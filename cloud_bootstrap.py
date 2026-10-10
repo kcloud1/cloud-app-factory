@@ -6,20 +6,23 @@ import re
 import sys
 from pathlib import Path
 
-from factory import InvalidIntake, plan, slug
+from factory import InvalidIntake, hostname as valid_hostname, plan, read_json, slug
 
 FACTORY_REPOSITORY = "kcloud1/cloud-app-factory"
+TEMPLATE_REVISION = "6e9ce945106919867c681bcbe2f7bedccbfe5f77"
+PUBLISHER_REVISION = "d60d213b3fa77510deb29b084b0efa802c7c16a4"
 
 
-def draft(app, purpose, hostname, budget, factory_revision):
+def draft(app, purpose, hostname, budget, factory_revision, inventory=None):
     name = slug(app)
     if not isinstance(factory_revision, str) or not re.fullmatch(r"[0-9a-f]{40}", factory_revision):
         raise InvalidIntake("Expected a reviewed full 40-character factory SHA")
     if not isinstance(purpose, str) or not purpose.strip() or len(purpose) > 200 or any(c in purpose for c in "\r\n<>"):
         raise InvalidIntake("Use a short public description without markup/newlines")
     host = hostname or f"{name}.amitk.life"
-    if host != f"{name}.amitk.life":
-        raise InvalidIntake("Fast path allows only the exact app.amitk.life hostname")
+    valid_hostname(host)
+    if not host.endswith(".amitk.life") or host.count(".") != 2:
+        raise InvalidIntake("Fast path allows one exact subdomain of amitk.life")
     if budget not in ("0", "0.0", "0.00"):
         raise InvalidIntake("Fast path has a $0 incremental-spend target; other budgets need review")
     intake = {
@@ -33,9 +36,22 @@ def draft(app, purpose, hostname, budget, factory_revision):
             "paid_services": "forbidden", "previews": "disabled"
         },
     }
-    proposed = plan(intake)
+    proposed = plan(intake, inventory)
     if proposed["execution_allowed"]:
         raise InvalidIntake("Planning must never authorize execution")
+    packet = {
+        "schema_version": 1, "request_id": proposed["plan_id"],
+        "state": "PLAN_ONLY", "execution_allowed": False,
+        "source_template": {"repository": "amitkarpe/repo-starter", "sha": TEMPLATE_REVISION},
+        "factory_revision": factory_revision, "target": proposed["target"],
+        "deployment_mode": "github-actions", "monthly_cost_cap_usd": "0.00",
+        "reviewed_publisher": {"sha": PUBLISHER_REVISION, "workflow": "factory-pilot-publish.yml", "allowlist": ["kcloud1/factory-pilot"], "new_apps_enabled": False},
+        "availability": {"github_app": "UNVERIFIED", "codex_cloud_environment": "UNVERIFIED", "secret_selection": "UNVERIFIED"},
+        "existing_matches": proposed["conflicts"],
+        "reconciliation": "Existing matches require ownership reconciliation; never create duplicates or infer authority from an inventory snapshot.",
+        "stop_gates": proposed["blockers"],
+        "state_contract": {"PLAN_ONLY": "deterministic proposal, no provider actions", "OWNER_APPROVAL_REQUIRED": "exact application intent/resource authorization absent", "READY": "requires independently verified approval, identity, collisions, credentials and sole writer", "DEPLOYED_VERIFIED": "requires actual run, provider version and exact HTTPS/source-SHA evidence"},
+    }
     task = f"""# Codex Cloud handoff — {name}
 
 This is a PROPOSAL, not permission to create a public app, domain or Worker.
@@ -83,10 +99,33 @@ jobs:
 """
     return {
         "plan.json": json.dumps(proposed, indent=2, sort_keys=True) + "\n",
+        "request.json": json.dumps(packet, indent=2, sort_keys=True) + "\n",
+        "REQUEST.md": f"# Proposed request {proposed['plan_id']}\n\nState: PLAN_ONLY; no execution authority.\n\nRepository: kcloud1/{name} (public)\nWorker: {name} in dev1\nHostname: {host} (public)\nBudget: $0 incremental; GitHub Actions sole writer.\nTemplate SHA: {TEMPLATE_REVISION}\nFactory SHA: {factory_revision}\n\nReconcile existing matches and stop gates in request.json before acceptance. The reviewed publisher currently authorizes ONLY factory-pilot. New applications require their own reviewed authorization/interface; this packet cannot deploy them.\n",
+        "EVIDENCE.json": json.dumps({"request_id": proposed["plan_id"], "state": "PLAN_ONLY", "approval_url": None, "app_pr_url": None, "merged_sha": None, "actions_run_id": None, "cloud_task_url": None, "cloudflare_version": None, "live_source_sha": None, "browser_checks": [], "blockers": proposed["blockers"]}, indent=2, sort_keys=True) + "\n",
         "CODEX_CLOUD_GO.md": task,
         ".factory/intake.json": json.dumps(intake, indent=2, sort_keys=True) + "\n",
         ".github/workflows/factory-plan.yml": caller,
     }
+
+
+def write_bundle(dest, output):
+    dest = dest.resolve()
+    # Repeated invocation reconciles identical files; changed output needs an
+    # explicit new revision/directory rather than silently replacing a packet.
+    for path, data in output.items():
+        target = dest / path
+        if target.is_symlink() or not target.resolve().is_relative_to(dest):
+            raise InvalidIntake("Output path must remain in the selected directory")
+        if target.exists() and (not target.is_file() or target.read_text() != data):
+            raise InvalidIntake("Existing request differs; use a new output revision")
+    for path, data in output.items():
+        target = dest / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if not target.exists():
+            target.write_text(data)
+    actual = {str(p.relative_to(dest)) for p in dest.rglob("*") if p.is_file()}
+    if actual != set(output) or any(p.is_symlink() for p in dest.rglob("*")):
+        raise InvalidIntake("Unexpected bundle files; do not upload")
 
 
 def main():
@@ -97,16 +136,12 @@ def main():
     parser.add_argument("--budget", default="0", help="Only $0 in this fast path")
     parser.add_argument("--factory-revision", required=True)
     parser.add_argument("--out", required=True)
+    parser.add_argument("--inventory", help="Optional offline names snapshot; cannot establish READY or grant authority")
     args = parser.parse_args()
     try:
-        output = draft(args.app, args.purpose, args.hostname, args.budget, args.factory_revision)
-        dest = Path(args.out).resolve()
-        for path, data in output.items():
-            target = (dest / path).resolve()
-            if not target.is_relative_to(dest):
-                raise InvalidIntake("Output must remain in the selected directory")
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(data)
+        output = draft(args.app, args.purpose, args.hostname, args.budget, args.factory_revision,
+                       read_json(args.inventory) if args.inventory else None)
+        write_bundle(Path(args.out), output)
     except (InvalidIntake, ValueError, OSError):
         print("Bootstrap input invalid or output unavailable. No provider actions taken.", file=sys.stderr)
         return 2

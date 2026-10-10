@@ -51,4 +51,6 @@ jobs:
         with:
           name: cloud-app-bootstrap
           path: bootstrap-output/
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 7
