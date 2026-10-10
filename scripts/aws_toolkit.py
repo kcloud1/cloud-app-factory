@@ -95,12 +95,42 @@ def open_install_lock(prefix):
         raise
 
 
+def appdev_executable(project):
+    if not project:
+        return None
+    target = project / ".aws-toolkit/app-dev"
+    for directory in (target.parent, target, target / "node_modules", target / "node_modules/.bin"):
+        if directory.is_symlink():
+            raise ValueError("app-dev tooling directories must not be symlinks")
+    for name in ("package.json", "package-lock.json"):
+        path = target / name
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            raise ValueError("app-dev package metadata must be regular project-local files")
+    executable = target / "node_modules/.bin/ampx"
+    if executable.is_symlink() and not executable.exists():
+        raise ValueError("Dangling project-local ampx link; inspect/rollback before installation")
+    if executable.exists():
+        expected = target / "node_modules/@aws-amplify/backend-cli/lib/ampx.js"
+        if executable.resolve() != expected.absolute():
+            raise ValueError("Project-local ampx is redirected outside its expected package")
+        if not appdev_matches(target):
+            raise ValueError("Existing app-dev package/lock differs; refuse execution before review")
+    return executable
+
+
 def tool_path(name, prefix, project):
     if name == "ampx":
-        return project / ".aws-toolkit/app-dev/node_modules/.bin/ampx" if project else None
+        return appdev_executable(project)
     managed = managed_bin(prefix) / name
     if managed.is_symlink() and not managed.exists():
         raise ValueError(f"Dangling managed {name} link; inspect/rollback before installation")
+    if managed.exists():
+        tool = MANIFEST["tools"][name]
+        arch = architecture()
+        relative = name if name == "session-manager-plugin" else tool["executable"].format(arch=arch)
+        expected = prefix / f"{name}-{tool['version']}-{arch}" / relative
+        if not managed.is_symlink() or managed.resolve() != expected.absolute():
+            raise ValueError(f"Managed {name} entry is redirected or not the expected version link")
     return managed if managed.exists() else shutil.which(name)
 
 
@@ -198,6 +228,7 @@ def extract(archive, target, kind):
 
 
 def install_binary(name, prefix, arch, existing):
+    tool_path(name, prefix, None)
     if existing["pinned"]:
         return "REUSED"
     tool = MANIFEST["tools"][name]
@@ -235,8 +266,7 @@ def appdev_matches(target):
 
 def install_appdev(project, existing):
     target = project / ".aws-toolkit/app-dev"
-    if target.parent.is_symlink() or target.is_symlink():
-        raise ValueError("app-dev tooling directories must not be symlinks")
+    appdev_executable(project)
     if target.exists():
         if not appdev_matches(target):
             raise ValueError("Existing app-dev package/lock differs; no project files overwritten")

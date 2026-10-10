@@ -47,6 +47,9 @@ nonblocking locking prevents concurrent installations. Lock symlinks, FIFOs,
 hard links and files owned by another user are rejected. Existing managed
 collisions fail closed rather than overwrite files. Completed earlier tools may
 remain if a later tool fails; inspect the inventory before retrying.
+Managed links must point to their exact pinned version files inside the prefix.
+App-dev inventory rejects redirected directories, metadata and executable paths
+before executing the local CLI; this applies to plans/checks as well as installs.
 
 Amplify installs under `<project>/.aws-toolkit/app-dev`, with a committed factory
 package/lock copied there and `npm ci --ignore-scripts --no-audit --no-fund`.

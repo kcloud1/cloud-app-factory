@@ -1,6 +1,7 @@
 """Credential-free safety boundaries; no vendor downloads in unit tests."""
 import importlib.util
 import os
+import shutil
 from pathlib import Path
 import tempfile
 import unittest
@@ -123,6 +124,48 @@ class ToolkitSafetyTests(unittest.TestCase):
                     toolkit.tool_path('aws', prefix, None)
                 which.assert_not_called()
 
+    def test_live_managed_link_cannot_redirect_to_external_executable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            prefix = root / 'prefix'
+            (prefix / 'bin').mkdir(parents=True)
+            external = root / 'external-aws'
+            external.write_text('external executable never run')
+            (prefix / 'bin/aws').symlink_to(external)
+            with self.assertRaisesRegex(ValueError, 'redirected'):
+                toolkit.tool_path('aws', prefix, None)
+            with self.assertRaisesRegex(ValueError, 'redirected'):
+                toolkit.install_binary('aws', prefix, 'amd64', {'pinned': True})
+
+    def test_redirected_appdev_tree_is_rejected_before_inventory(self):
+        for redirect in ('app-dev', 'node_modules'):
+            with self.subTest(redirect=redirect), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                project, outside = root / 'project', root / 'outside'
+                target = project / '.aws-toolkit/app-dev'
+                target.mkdir(parents=True)
+                outside.mkdir()
+                for name in ('package.json', 'package-lock.json'):
+                    shutil.copyfile(toolkit.PROFILES / 'app-dev' / name, target / name)
+                if redirect == 'app-dev':
+                    shutil.rmtree(target)
+                    target.symlink_to(outside)
+                else:
+                    (target / 'node_modules').symlink_to(outside)
+                with self.assertRaisesRegex(ValueError, 'must not be symlinks'):
+                    toolkit.tool_path('ampx', root / 'prefix', project)
+
+    def test_ampx_executable_link_cannot_redirect_outside_package(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            executable = root / '.aws-toolkit/app-dev/node_modules/.bin/ampx'
+            executable.parent.mkdir(parents=True)
+            external = root / 'external-ampx'
+            external.write_text('not executed')
+            executable.symlink_to(external)
+            with self.assertRaisesRegex(ValueError, 'redirected outside'):
+                toolkit.tool_path('ampx', root / 'prefix', root)
+
     def test_symlinked_lock_does_not_create_external_target(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -158,10 +201,14 @@ class ToolkitSafetyTests(unittest.TestCase):
             project = Path(tmp)
             exe = project / '.aws-toolkit/app-dev/node_modules/.bin/ampx'
             exe.parent.mkdir(parents=True)
-            exe.write_text('not executed')
-            with patch.object(toolkit, 'version', return_value=toolkit.MANIFEST['tools']['ampx']['version']):
-                receipt = toolkit.inventory('app-dev', project / 'prefix', project)
-            self.assertFalse(receipt['ampx']['pinned'])
+            expected = project / '.aws-toolkit/app-dev/node_modules/@aws-amplify/backend-cli/lib/ampx.js'
+            expected.parent.mkdir(parents=True)
+            expected.write_text('not executed')
+            exe.symlink_to(expected)
+            with patch.object(toolkit, 'version', return_value=toolkit.MANIFEST['tools']['ampx']['version']) as probe:
+                with self.assertRaisesRegex(ValueError, 'package/lock differs'):
+                    toolkit.inventory('app-dev', project / 'prefix', project)
+                self.assertFalse(any(call.args[0] == 'ampx' for call in probe.call_args_list))
 
     def test_unsupported_platform_stops_without_install(self):
         with patch.object(toolkit.platform, 'system', return_value='Darwin'):
