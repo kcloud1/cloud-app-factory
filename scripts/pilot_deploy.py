@@ -131,7 +131,7 @@ def main():
         validate(args.artifact, args.sha)
     except (ValueError, OSError, KeyError):
         raise SystemExit("Pilot live preflight blocked; no deployment attempted")
-    subprocess.run(["node", str(trusted), "deploy", "--config", str((args.artifact / "wrangler.json").resolve()), "--cwd", str(args.artifact.resolve())], check=True)
+    subprocess.run(["node", str(trusted), "deploy", "--strict", "--config", str((args.artifact / "wrangler.json").resolve()), "--cwd", str(args.artifact.resolve())], check=True)
 
 
 if __name__ == "__main__":

@@ -11,6 +11,8 @@ Pilot PR: https://github.com/kcloud1/factory-pilot/pull/1
   allow only the exact Worker/domain, static assets and disabled public endpoints.
   Revalidate immediately before `node <trusted-wrangler> deploy --config <exact-file>
   --cwd <artifact-root>`. No implicit config discovery or caller Wrangler executable.
+  Re-review also requires `--strict`, preventing unknown dashboard-only settings
+  from being overwritten in a noninteractive release.
 - P1 credentials: independent build and deploy jobs/runners. The build sees no
   provider secrets. Transfer only seven allowlisted inert static files and canonical
   JSON config via this run's immutable artifact ID. Deploy checks out only pinned
