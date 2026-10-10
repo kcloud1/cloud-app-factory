@@ -74,10 +74,19 @@ def version(name, executable):
     return match[1]
 
 
+def managed_bin(prefix):
+    directory = prefix / "bin"
+    if directory.is_symlink() or (directory.exists() and not directory.is_dir()):
+        raise ValueError("Managed prefix/bin must be a real directory, not a symlink/file")
+    return directory
+
+
 def tool_path(name, prefix, project):
     if name == "ampx":
         return project / ".aws-toolkit/app-dev/node_modules/.bin/ampx" if project else None
-    managed = prefix / "bin" / name
+    managed = managed_bin(prefix) / name
+    if managed.is_symlink() and not managed.exists():
+        raise ValueError(f"Dangling managed {name} link; inspect/rollback before installation")
     return managed if managed.exists() else shutil.which(name)
 
 
@@ -179,7 +188,7 @@ def install_binary(name, prefix, arch, existing):
         return "REUSED"
     tool = MANIFEST["tools"][name]
     destination = prefix / f"{name}-{tool['version']}-{arch}"
-    link = prefix / "bin" / name
+    link = managed_bin(prefix) / name
     if link.exists() or link.is_symlink() or destination.exists():
         raise ValueError(f"Managed {name} collision; inspect/rollback it before installation")
     with tempfile.TemporaryDirectory(prefix=".stage-", dir=prefix) as tmp:
@@ -257,7 +266,7 @@ def main():
             prefix.mkdir(parents=True, exist_ok=True)
             with (prefix / ".install.lock").open("a") as lock:
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                (prefix / "bin").mkdir(exist_ok=True)
+                managed_bin(prefix).mkdir(exist_ok=True)
                 for name in MANIFEST["profiles"][profile]:
                     actions[name] = (install_appdev(project, tools[name]) if name == "ampx" else
                                      install_binary(name, prefix, arch, tools[name]))

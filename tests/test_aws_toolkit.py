@@ -99,6 +99,29 @@ class ToolkitSafetyTests(unittest.TestCase):
                 toolkit.install_appdev(project, {'pinned': False})
             self.assertEqual(list(outside.iterdir()), [])
 
+    def test_managed_bin_symlink_cannot_redirect_install(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            prefix, outside = root / 'prefix', root / 'outside'
+            prefix.mkdir()
+            outside.mkdir()
+            (prefix / 'bin').symlink_to(outside)
+            with patch.object(toolkit, 'download') as download:
+                with self.assertRaisesRegex(ValueError, 'real directory'):
+                    toolkit.install_binary('aws', prefix, 'amd64', {'pinned': False})
+                download.assert_not_called()
+            self.assertEqual(list(outside.iterdir()), [])
+
+    def test_dangling_managed_link_does_not_fall_back_to_system_tool(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prefix = Path(tmp)
+            (prefix / 'bin').mkdir()
+            (prefix / 'bin/aws').symlink_to(prefix / 'missing')
+            with patch.object(toolkit.shutil, 'which') as which:
+                with self.assertRaisesRegex(ValueError, 'Dangling managed aws link'):
+                    toolkit.tool_path('aws', prefix, None)
+                which.assert_not_called()
+
     def test_same_ampx_version_with_drifted_lock_does_not_pass_check(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp)
