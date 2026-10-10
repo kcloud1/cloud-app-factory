@@ -160,6 +160,8 @@ steps describe a future separately approved personal-lab pilot.
    Reusable supports enrollment of new task nodes; Ephemeral removes offline
    nodes automatically. Key expiry/revocation prevents further enrollment but
    is not a substitute for revoking access/removing already enrolled devices.
+   Tagged devices have node-key expiry disabled by default; a short enrollment
+   key expiry does not create a short-lived authorization for an online node.
 5. Enter the key directly in Codex Cloud environment **Advanced → VPN → Add →
    Tailscale** (labels may vary). Never put it in an Issue, PR, chat, source file,
    screenshot, init script, shell history or general task environment variable.
@@ -280,6 +282,8 @@ deploy writer or trigger a deployment just to test VPN cleanup.
   control/data plane, WireGuard, NAT traversal, direct/relay transport.
 - [Auth-key handling](https://tailscale.com/docs/features/access-control/auth-keys/how-to/secure-auth-keys):
   reusable-key disclosure risks. Use the integrated VPN field here, not CLI key examples.
+- [Auth-key lifecycle](https://tailscale.com/docs/features/access-control/auth-keys):
+  enrollment-key expiry/revocation versus existing nodes and tagged node-key expiry.
 - Active Codex `cloud-environment:cloud-environment-runtime` skill,
   `references/networking.md` and `references/vpn.md`: executor/sidecar separation,
   proxies, TCP grants, DNS limitations and runtime diagnosis. These are runtime
