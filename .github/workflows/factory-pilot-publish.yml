@@ -1,0 +1,167 @@
+name: M3 approved factory-pilot Git release
+
+on:
+  workflow_call:
+    inputs:
+      factory_revision:
+        required: true
+        type: string
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: true
+      CLOUDFLARE_ACCOUNT_ID:
+        required: true
+
+permissions:
+  contents: read
+
+# Repository-scoped Actions concurrency is only one layer. Live Builds readback
+# in the deploy job is mandatory even on routine releases.
+concurrency:
+  group: dev1-factory-pilot-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: >-
+      github.repository == 'kcloud1/factory-pilot' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      github.ref_protected
+    runs-on: ubuntu-latest
+    outputs:
+      artifact_id: ${{ steps.artifact.outputs.artifact-id }}
+    steps:
+      - name: Verify immutable factory workflow identity
+        env:
+          FACTORY_REVISION: ${{ inputs.factory_revision }}
+          WORKFLOW_IDENTITY: ${{ toJSON(job) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          revision = os.environ["FACTORY_REVISION"]
+          job = json.loads(os.environ["WORKFLOW_IDENTITY"])
+          if not re.fullmatch(r"[0-9a-f]{40}", revision):
+              raise SystemExit("A pinned factory SHA is required")
+          if job.get("workflow_repository") != "kcloud1/cloud-app-factory" or job.get("workflow_sha") != revision:
+              raise SystemExit("Reusable workflow revision mismatch")
+          PY
+
+      - name: Checkout factory validators
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: kcloud1/cloud-app-factory
+          ref: ${{ inputs.factory_revision }}
+          persist-credentials: false
+          path: factory
+
+      - name: Checkout exact protected-main commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          path: caller
+
+      - name: Set up build Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24.21.0'
+
+      - name: Validate and build without provider secrets
+        working-directory: caller
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.sha }}
+        run: |
+          npm ci
+          npm run check
+          npm run build
+
+      - name: Prepare only validated static assets and canonical config
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          python3 factory/scripts/pilot_artifact.py caller "$EXPECTED_SHA" --prepare pilot-artifact
+
+      - name: Upload inert artifact from this run
+        id: artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pilot-${{ github.sha }}-${{ github.run_attempt }}
+          path: pilot-artifact/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    needs: build
+    if: >-
+      github.repository == 'kcloud1/factory-pilot' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      github.ref_protected
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify deploy job workflow identity independently
+        env:
+          FACTORY_REVISION: ${{ inputs.factory_revision }}
+          WORKFLOW_IDENTITY: ${{ toJSON(job) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          revision = os.environ["FACTORY_REVISION"]
+          job = json.loads(os.environ["WORKFLOW_IDENTITY"])
+          if not re.fullmatch(r"[0-9a-f]{40}", revision) or job.get("workflow_repository") != "kcloud1/cloud-app-factory" or job.get("workflow_sha") != revision:
+              raise SystemExit("Reusable workflow revision mismatch")
+          PY
+
+      - name: Checkout trusted factory only (never caller source/tooling)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: kcloud1/cloud-app-factory
+          ref: ${{ inputs.factory_revision }}
+          persist-credentials: false
+          path: factory
+
+      - name: Set up clean deploy Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24.21.0'
+
+      - name: Install integrity-locked factory tooling before credentials
+        run: npm ci --prefix factory/deploy-tooling --ignore-scripts --no-audit --no-fund
+
+      - name: Download only this build job's immutable artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
+          path: pilot-artifact
+          merge-multiple: true
+
+      - name: Revalidate downloaded artifact without credentials
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: python3 factory/scripts/pilot_artifact.py pilot-artifact "$EXPECTED_SHA"
+
+      - name: Fresh live preflight and explicitly bound deploy
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          python3 factory/scripts/pilot_deploy.py \
+            --artifact pilot-artifact --sha "$EXPECTED_SHA" \
+            --wrangler factory/deploy-tooling/node_modules/wrangler/bin/wrangler.js
+
+      - name: Record Git release identity
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          FACTORY_REVISION: ${{ inputs.factory_revision }}
+        run: |
+          {
+            echo "Git-triggered Worker deployment: factory-pilot"
+            echo "Source SHA: $SOURCE_SHA"
+            echo "Factory workflow SHA: $FACTORY_REVISION"
+            echo "Approved hostname: factory-pilot.amitk.life"
+            echo "Verify deployment/version and HTTPS independently before closing Issue #3."
+          } >> "$GITHUB_STEP_SUMMARY"
