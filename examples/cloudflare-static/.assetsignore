@@ -1,0 +1,5 @@
+# Allowlist public frontend files; exclude source, docs, credentials and Git metadata.
+**
+!index.html
+!style.css
+!script.js
