@@ -1,0 +1,91 @@
+{
+  "researched_on": "2026-10-11",
+  "profiles": {
+    "core": [
+      "aws",
+      "gh"
+    ],
+    "cloudops": [
+      "aws",
+      "gh",
+      "session-manager-plugin",
+      "terraform"
+    ],
+    "app-dev": [
+      "aws",
+      "gh",
+      "ampx"
+    ]
+  },
+  "tools": {
+    "aws": {
+      "version": "2.37.12",
+      "format": "zip",
+      "executable": "aws/dist/aws",
+      "source": "https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html",
+      "assets": {
+        "amd64": {
+          "url": "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.37.12.zip",
+          "sha256": "e6d3c672fb36ed4b12c354c39a993eee2b34da1437cafb10bac4480840cfa83f"
+        },
+        "arm64": {
+          "url": "https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.37.12.zip",
+          "sha256": "829c76096e05f743267d75098bc7cc7cfae799fc7e568554ebaa6d78e6aba753"
+        }
+      }
+    },
+    "gh": {
+      "version": "2.102.0",
+      "format": "tar",
+      "executable": "gh_2.102.0_linux_{arch}/bin/gh",
+      "source": "https://github.com/cli/cli/releases/tag/v2.102.0",
+      "assets": {
+        "amd64": {
+          "url": "https://github.com/cli/cli/releases/download/v2.102.0/gh_2.102.0_linux_amd64.tar.gz",
+          "sha256": "bb766f710eef8ede859c18578c72c327597cd4c8a85b06001b1f3843c6019386"
+        },
+        "arm64": {
+          "url": "https://github.com/cli/cli/releases/download/v2.102.0/gh_2.102.0_linux_arm64.tar.gz",
+          "sha256": "7862c86c72f43df3a2d93ddde6f473285b4e2af61b494849846827e513ef6484"
+        }
+      }
+    },
+    "session-manager-plugin": {
+      "version": "1.2.896.0",
+      "format": "deb",
+      "executable": "usr/local/sessionmanagerplugin/bin/session-manager-plugin",
+      "source": "https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-debian-and-ubuntu.html",
+      "assets": {
+        "amd64": {
+          "url": "https://s3.amazonaws.com/session-manager-downloads/plugin/1.2.896.0/ubuntu_64bit/session-manager-plugin.deb",
+          "sha256": "53f51fcc67314a4bf85888a38a3967cd41f8d0f28a60a9469a63acf935ba713e"
+        },
+        "arm64": {
+          "url": "https://s3.amazonaws.com/session-manager-downloads/plugin/1.2.896.0/ubuntu_arm64/session-manager-plugin.deb",
+          "sha256": "914eeca87b18b55356c58be197080f73742b3ca60d3823f0a45670dc9056aa9c"
+        }
+      }
+    },
+    "terraform": {
+      "version": "1.16.5",
+      "format": "zip",
+      "executable": "terraform",
+      "source": "https://releases.hashicorp.com/terraform/1.16.5/terraform_1.16.5_SHA256SUMS",
+      "assets": {
+        "amd64": {
+          "url": "https://releases.hashicorp.com/terraform/1.16.5/terraform_1.16.5_linux_amd64.zip",
+          "sha256": "2bc2fcfff033265c9e02ca0351f01794eb122f62a9b2a49a3294b9e49eaab5e4"
+        },
+        "arm64": {
+          "url": "https://releases.hashicorp.com/terraform/1.16.5/terraform_1.16.5_linux_arm64.zip",
+          "sha256": "61a50b00485ee4810cf20581ef080fc54d34d666e175c58d9a10501c65c1ccde"
+        }
+      }
+    },
+    "ampx": {
+      "version": "1.10.0",
+      "format": "npm-lock",
+      "source": "https://docs.amplify.aws/react/start/manual-installation/"
+    }
+  }
+}

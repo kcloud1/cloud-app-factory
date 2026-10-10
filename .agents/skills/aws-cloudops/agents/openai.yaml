@@ -1,0 +1,3 @@
+interface:
+  display_name: "AWS Cloud Toolkit"
+  short_description: "Optional pinned AWS tools and safe project handoffs"
