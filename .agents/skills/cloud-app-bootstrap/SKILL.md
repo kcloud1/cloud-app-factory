@@ -11,11 +11,11 @@ Ask only for app slug, public fictional purpose, exact hostname (default app.ami
 
 ## Execute with Codex Cloud
 
-1. From the factory GitHub **Actions** page, run **New cloud app - four answers (plan only)**. This has no provider secrets and creates an artifact with `plan.json`, `CODEX_CLOUD_GO.md`, `.factory/intake.json` and a read-only caller workflow.
+1. From the factory GitHub **Actions** page, run **New cloud app - four answers (plan only)**. This has no provider secrets and creates the validated seven-file request/plan/evidence/handoff bundle, including hidden intake and read-only caller workflow.
 2. Read the plan and accept the exact proposed public repo/Worker/hostname before provisioning. A green plan is never a deployment approval.
 3. Reuse the repo and published Codex Cloud environment if present. Otherwise surface the one-time GitHub template/repository and Codex Cloud environment authorization. Never claim a local CLI task is Codex Cloud.
 4. Use `CODEX_CLOUD_GO.md` inside the actual repo-bound Codex Cloud task. One cohesive PR, review, protected main, exact full SHA, minimal checks.
-5. Do not invoke any generic publisher until Issue #3's pilot is live-proven and a shared publishing workflow is independently reviewed/merged. Pin to its full commit SHA and pass only explicitly named caller repo secrets; not `secrets: inherit`.
+5. M3 is live-proven. Its merged publisher remains factory-pilot only; new apps need exact authorization and a reviewed release interface. Pin to its full merged SHA and pass only named caller repo secrets; not `secrets: inherit`.
 6. Before first Worker/domain write, verify resource uniqueness, caller secret selection, token scope/expiry, approved exact hostname, $0 policy and native Builds exclusion. Stop on mismatches. Never substitute manual deploy for Git proof.
 7. Once authorized, verify Git Actions run, deployed source SHA, Cloudflare version, exact HTTPS domain and two browser interactions; publish evidence.
 
