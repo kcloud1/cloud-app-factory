@@ -184,6 +184,20 @@ for the default workflow or purchase them under this issue.
 
 ## Bounded validation and evidence
 
+### An auth key exists: what must happen next?
+
+Creating a key in Tailscale's **Auth keys** page does not connect a Codex
+environment. After the specific pilot is approved, enter it only in that
+environment's **Advanced → VPN → Tailscale** field, save, publish/republish,
+and start a new cloud task in that published environment. Keep the key out of
+local CLI prompts and general environment variables. Verify the new task's
+policy snapshot before requesting the exact approved service URL. A key's
+existence, or an environment's generic connected status, is not VPN proof.
+
+Use web/mobile to select that environment, or your authenticated personal CLI's
+`codex cloud` picker and `codex cloud exec --env ENV_ID`. This selects a cloud
+task environment; it does not establish an inbound SSH/VPN connection to its VM.
+
 After separate endpoint/policy authorization, read the supported policy snapshot:
 
 ```sh
@@ -261,7 +275,8 @@ deploy writer or trigger a deployment just to test VPN cleanup.
   desired HTTP policy with state **unknown**; enforcement and VPN health are
   not inferred from it. No private endpoint or denied-target request was made.
 - `DOCS` and `CLI_VS_VPN`: source review and local CLI help checks completed;
-  authenticated CLI listing returned 401. See the [CLI receipt](CODEX_CLI_CLOUD.md).
+  a CLI list request using the managed-session token was rejected with 401;
+  authentication was not established. See the [CLI receipt](CODEX_CLI_CLOUD.md).
 - M4's [existing receipt](https://github.com/kcloud1/cloud-app-factory/issues/4#issuecomment-6099912560)
   records actual cloud development, pilot PR #2, automatic release run
   `38068905425`, exact source SHA and HTTP release readback. PR #8 is merged.
