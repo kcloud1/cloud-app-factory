@@ -1,0 +1,112 @@
+name: Reusable release gate (publish disabled)
+on:
+  workflow_call:
+    inputs:
+      factory_revision:
+        description: Reviewed full SHA matching the reusable workflow pin
+        required: true
+        type: string
+      plan_path:
+        description: M1 plan JSON inside caller checkout
+        required: true
+        type: string
+      inventory_path:
+        description: Optional exact offline snapshot used by the M1 plan
+        default: ''
+        type: string
+      worker:
+        description: Exact proposed Worker for concurrency and plan binding
+        required: true
+        type: string
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        description: Explicit caller mapping; only presence is checked
+        required: false
+      CLOUDFLARE_ACCOUNT_ID:
+        description: Existing secret compatibility; prefer caller variable
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: cloudflare-dev1-${{ inputs.worker }}
+  cancel-in-progress: false
+jobs:
+  gate:
+    if: >-
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      github.ref == 'refs/heads/main' && github.ref_protected
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate reviewed factory pin
+        env:
+          FACTORY_REVISION: ${{ inputs.factory_revision }}
+          WORKFLOW_IDENTITY: ${{ toJSON(job) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          if not re.fullmatch(r"[0-9a-f]{40}", os.environ["FACTORY_REVISION"]):
+              raise SystemExit("Full reviewed factory SHA required")
+          identity = json.loads(os.environ["WORKFLOW_IDENTITY"])
+          if identity.get("workflow_repository") != "kcloud1/cloud-app-factory" or identity.get("workflow_sha") != os.environ["FACTORY_REVISION"]:
+              raise SystemExit("Workflow and factory pins must match")
+          PY
+      - name: Checkout exact caller source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          path: caller
+      - name: Checkout trusted factory and allowlist
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: kcloud1/cloud-app-factory
+          ref: ${{ inputs.factory_revision }}
+          persist-credentials: false
+          path: factory
+      - name: Check no-write release contract
+        env:
+          FACTORY_REVISION: ${{ inputs.factory_revision }}
+          CALLER_REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+          CALLER_REF: ${{ github.ref }}
+          CALLER_EVENT: ${{ github.event_name }}
+          REF_PROTECTED: ${{ github.ref_protected }}
+          WORKER: ${{ inputs.worker }}
+          PLAN_PATH: ${{ inputs.plan_path }}
+          INVENTORY_PATH: ${{ inputs.inventory_path }}
+          TOKEN_PRESENT: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+          ACCOUNT_PRESENT: ${{ vars.CLOUDFLARE_ACCOUNT_ID != '' || secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          context = {
+              "factory_revision": os.environ["FACTORY_REVISION"],
+              "checked_out_factory_revision": subprocess.check_output(["git", "-C", "factory", "rev-parse", "HEAD"], text=True).strip(),
+              "repository": os.environ["CALLER_REPOSITORY"],
+              "source_sha": os.environ["SOURCE_SHA"],
+              "ref": os.environ["CALLER_REF"],
+              "event": os.environ["CALLER_EVENT"],
+              "ref_protected": os.environ["REF_PROTECTED"] == "true",
+              "worker": os.environ["WORKER"],
+              "token_present": os.environ["TOKEN_PRESENT"] == "true",
+              "account_id_present": os.environ["ACCOUNT_PRESENT"] == "true",
+          }
+          Path("release-context.json").write_text(json.dumps(context))
+          command = ["python3", "factory/release_gate.py", "--caller-root", "caller", "--plan", os.environ["PLAN_PATH"], "--context", "release-context.json"]
+          if os.environ["INVENTORY_PATH"]:
+              command.extend(["--inventory", os.environ["INVENTORY_PATH"]])
+          with open("release-gate.json", "w") as output:
+              subprocess.run(command, stdout=output, check=True)
+          report = json.loads(Path("release-gate.json").read_text())
+          if report["execution_allowed"] or report["publish_enabled"]:
+              raise SystemExit("Publish must remain disabled")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as output:
+              output.write("Release gate: APPROVAL_REQUIRED / PLAN_ONLY. Publish disabled.\n")
+          PY
+      - name: Retain secret-free gate report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-gate
+          path: release-gate.json
+          retention-days: 7

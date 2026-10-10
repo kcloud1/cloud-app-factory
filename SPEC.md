@@ -16,7 +16,9 @@ Actions dry-run workflow with future deployment design.
 Amit's 2026-10-10 GO authorizes implementation, local checks, branch/commit,
 one cohesive PR and Issue evidence. His later explicit instruction authorizes
 Codex to review and merge M0–M1 without waiting for G. M2 remains gated.
-Follow-up Issues/PRs require their own approved scope; do not invent work to meet a count.
+Issue #2 is now active under Amit's instruction to continue/review/merge queued work.
+Its scope is the no-write release gate and read-only credential metadata. Issue #3
+still needs exact pilot authorization; #4 waits for live pilot acceptance.
 
 ## MUST
 
@@ -60,4 +62,15 @@ Rollback is a reviewed source revert; no runtime resources need cleanup.
 Stop on identity mismatch, unresolved validation failure or work outside limits.
 Pass: complete contracts, working deterministic valid/invalid intake, explicit
 unresolved gates, reviewed workflow/design and one evidence-backed PR.
-M2 requires the separate [exact authorization packet](docs/FACTORY_PIPELINE.md).
+Live provisioning/release requires the separate
+[M3 exact authorization packet](docs/M3_PILOT_PACKET.md).
+
+## M2 — no-write release gate
+
+Preserve the M1 interface/schema and use selected app repositories as callers of
+full-SHA-pinned factory workflows. The caller's secret context is authoritative;
+factory secrets are not inherited. Add exact allowlist/hash/revision/commit/ref/
+credential metadata gates, serial concurrency, safe evidence and a copy-ready
+pilot packet. Only `PLAN_ONLY` / `APPROVAL_REQUIRED` states are implemented, with
+publish permanently disabled in this milestone. Record unavailable provider
+facts separately from verified metadata. No deploy/provision/secret expansion.

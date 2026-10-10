@@ -21,11 +21,16 @@ jobs:
 This caller design is not installed/executed. No secrets block, Wrangler, deploy
 action or write permission exists in M1. Separate caller/factory checkouts prevent
 caller code replacing planner code. Intake resolves inside caller checkout.
-Caller must match the workflow and factory pins. Artifacts live seven days;
+Caller must match the workflow and factory pins; M2 now enforces this using the
+job's workflow identity. Artifacts live seven days;
 never place private descriptions in this public evidence path. Hosted execution
 and artifact upload are unproven until an authorized run.
 
 ## Future approved release
+
+The M2 [implemented release gate](RELEASE_GATE.md) checks the future invocation
+contract but keeps actual publish disabled. This section describes the later
+release path, not runnable deployment in M2.
 
 Amit supplies intake; owner-selected Codex Cloud uses the accepted plan and app
 governance to implement in the exact authorized app repository and submits a PR.

@@ -24,8 +24,16 @@ jobs:
       - name: Validate factory revision
         env:
           FACTORY_REVISION: ${{ inputs.factory_revision }}
+          WORKFLOW_IDENTITY: ${{ toJSON(job) }}
         run: |
-          python3 -c 'import os,re; assert re.fullmatch(r"[0-9a-f]{40}", os.environ["FACTORY_REVISION"]), "Full factory SHA required"'
+          python3 - <<'PY'
+          import json, os, re
+          if not re.fullmatch(r"[0-9a-f]{40}", os.environ["FACTORY_REVISION"]):
+              raise SystemExit("Full factory SHA required")
+          identity = json.loads(os.environ["WORKFLOW_IDENTITY"])
+          if identity.get("workflow_repository") != "kcloud1/cloud-app-factory" or identity.get("workflow_sha") != os.environ["FACTORY_REVISION"]:
+              raise SystemExit("Workflow and factory pins must match")
+          PY
       - name: Checkout reviewed factory revision
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:

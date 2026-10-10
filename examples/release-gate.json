@@ -1,0 +1,44 @@
+{
+  "blockers": [
+    "CREDENTIAL_AVAILABILITY_UNVERIFIED",
+    "CREDENTIAL_SCOPE_AND_EXPIRATION_READBACK_REQUIRED",
+    "DOMAIN_AND_BUDGET_READBACK_REQUIRED",
+    "EXACT_OWNER_APPROVAL_REQUIRED",
+    "LIVE_PROVIDER_READBACK_REQUIRED",
+    "M2_PUBLISH_DISABLED",
+    "PIPELINE_EXCLUSIVITY_READBACK_REQUIRED",
+    "SECRET_REPO_SELECTION_READBACK_REQUIRED"
+  ],
+  "execution_allowed": false,
+  "factory_revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "operations_state": "PLAN_ONLY",
+  "owner_packet": {
+    "account_alias": "dev1",
+    "codex_cloud": "owner-selected environment; unverified",
+    "github_app": "no Cloudflare Builds installation needed for Actions",
+    "hostname": "status-board.amitk.life",
+    "monthly_budget_usd": "0.00",
+    "pipeline": "github-actions",
+    "preview_urls": false,
+    "repository": "kcloud1/status-board",
+    "rollback": "approved known-good version or source revert; no action authorized here",
+    "secret_context": "exact selected app caller repository; explicit mapping",
+    "visibility": "public",
+    "worker": "status-board",
+    "workers_dev": false
+  },
+  "plan_id": "7fc7917cc12b38d60addfd2a4fcb267723a0a10b7f4e8fe0190efdbc873276e6",
+  "publish_enabled": false,
+  "schema_version": 1,
+  "source_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "state": "APPROVAL_REQUIRED",
+  "target": {
+    "account_alias": "dev1",
+    "application_visibility": "public",
+    "hostname": "status-board.amitk.life",
+    "production_branch": "main",
+    "repository": "kcloud1/status-board",
+    "repository_visibility": "public",
+    "worker": "status-board"
+  }
+}

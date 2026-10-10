@@ -48,7 +48,16 @@ in M1. Public standard GitHub runners are allowed; private runner eligibility ne
 Each app owns a repository, Worker, exact hostname, budget and authorization.
 Actions and native Builds must never both deploy the same Worker. Inherited native
 onboarding is reference guidance; Issue #1 selects this factory's Actions design.
-M2 stays gated after M1 merge.
+M2 adds [the no-write release gate](docs/RELEASE_GATE.md), with actual publication
+disabled. M3 provisioning remains separately gated after M2 merge.
+
+```bash
+python3 release_gate.py --caller-root . --plan examples/plan.json --context examples/release-context.json
+```
+
+The synthetic example reports `APPROVAL_REQUIRED` / `PLAN_ONLY`. Exit 0 means
+the report was produced, never release readiness. `release-targets.json` is an
+empty reviewed factory allowlist; no application has live authority.
 
 Start with [AGENTS.md](AGENTS.md), [accepted intent](intent/0001-project-bootstrap/intent.md),
 [SPEC.md](SPEC.md) and [ENV.md](ENV.md) as their read contract requires.
