@@ -9,14 +9,15 @@
 ## Current truth/active work
 
 - Initialized for offline M0–M1; accepted intent and ACTIVE SPEC recorded.
-- Issue: https://github.com/kcloud1/cloud-app-factory/issues/1
-- PR: https://github.com/kcloud1/cloud-app-factory/pull/5 (M0–M1 delivery).
-- Queued follow-up: Issue #2 release gate; #3 needs exact pilot approval;
-  #4 depends on #3 live acceptance.
+- Active issue: https://github.com/kcloud1/cloud-app-factory/issues/2
+- M0–M1 PR #5 merged; no-write M2 release gate on `feat/2-release-gate`.
+- Issue #3 needs exact pilot approval and provider metadata;
+  Issue #4 cannot dispatch until #3 live acceptance.
 - Amit authorizes Codex review/merge of M0–M1; M2 stays gated.
 - No provider resources, deployments or secret reads.
-- No M0–M1 runtime blocker; future credentials/domains/resources unverified.
+- Org-secret metadata listing denied (403); no authorized Cloudflare readback.
+  Future credentials/domains/resources remain unverified; offline gates complete.
 
 ## Next action
 
-Merge validated PR #5, then implement Issue #2's no-write release gate.
+Publish/review/merge Issue #2 PR, then retain Issue #3's exact pilot owner gate.

@@ -1,0 +1,12 @@
+{
+  "repository": "kcloud1/status-board",
+  "worker": "status-board",
+  "source_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "factory_revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "checked_out_factory_revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "event": "push",
+  "ref": "refs/heads/main",
+  "ref_protected": true,
+  "token_present": false,
+  "account_id_present": false
+}
