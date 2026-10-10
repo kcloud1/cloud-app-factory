@@ -18,7 +18,8 @@ one cohesive PR and Issue evidence. His later explicit instruction authorizes
 Codex to review and merge M0–M1 without waiting for G. M2 remains gated.
 Issue #2 is now active under Amit's instruction to continue/review/merge queued work.
 Its scope is the no-write release gate and read-only credential metadata. Issue #3
-still needs exact pilot authorization; #4 waits for live pilot acceptance.
+now has exact pilot authorization in its owner receipt and current M3 GO;
+#4 waits for live pilot acceptance.
 
 ## MUST
 
@@ -74,3 +75,27 @@ credential metadata gates, serial concurrency, safe evidence and a copy-ready
 pilot packet. Only `PLAN_ONLY` / `APPROVAL_REQUIRED` states are implemented, with
 publish permanently disabled in this milestone. Record unavailable provider
 facts separately from verified metadata. No deploy/provision/secret expansion.
+
+## M3 — exact approved pilot
+
+Authority: Issue #3 owner receipt `6097068396` plus the current FIX AND COMPLETE
+M3 instruction. Fix existing factory PR #7, then reviewed merge; pin existing
+pilot PR #1 to the actual merged factory SHA; reviewed squash merge and one
+Git-triggered release. Existing approved account `dev1`, Worker `factory-pilot`,
+and only `factory-pilot.amitk.life`; fictional static data, previews/workers.dev
+disabled, GitHub Actions sole writer, $0 incremental target. No manual deploy,
+AWS, paid feature, token creation/widening, wildcard DNS or duplicate resource.
+M2's no-write workflow remains unchanged. Earlier milestone MUST NOT limits
+remain binding outside this exact M3 exception.
+
+Build and credentialed deploy use separate runners. Transfer only inert assets
+and factory-generated validated config. Install pinned integrity-locked Wrangler
+before credentials; no caller source/npm/executables in deploy job. Revalidate,
+reject config redirects and perform current token/account/zone/collision/Builds
+readback before the explicitly bound deployment. Inaccessible metadata blocks
+publication. Preserve same run IDs on uncertainty; no blind retry.
+
+Close Issue #3 only after exact merged SHA/run/deployment/version/custom HTTPS
+and exactly two live browser checks agree. After PASS, Issue #4 may implement
+four-answer onboarding and one actual Codex Cloud update to this same pilot;
+no second app or local-CLI substitute for Cloud development proof.
