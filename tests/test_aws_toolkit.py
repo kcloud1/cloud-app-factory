@@ -1,5 +1,6 @@
 """Credential-free safety boundaries; no vendor downloads in unit tests."""
 import importlib.util
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -121,6 +122,36 @@ class ToolkitSafetyTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'Dangling managed aws link'):
                     toolkit.tool_path('aws', prefix, None)
                 which.assert_not_called()
+
+    def test_symlinked_lock_does_not_create_external_target(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            prefix = root / 'prefix'
+            prefix.mkdir()
+            external = root / 'not-created'
+            (prefix / '.install.lock').symlink_to(external)
+            with self.assertRaises(OSError):
+                toolkit.open_install_lock(prefix)
+            self.assertFalse(external.exists())
+
+    def test_fifo_lock_is_rejected_without_blocking(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prefix = Path(tmp)
+            os.mkfifo(prefix / '.install.lock')
+            with self.assertRaisesRegex(ValueError, 'regular, unshared file'):
+                toolkit.open_install_lock(prefix)
+
+    def test_hardlinked_lock_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            prefix = root / 'prefix'
+            prefix.mkdir()
+            external = root / 'preserved'
+            external.write_text('preserved')
+            os.link(external, prefix / '.install.lock')
+            with self.assertRaisesRegex(ValueError, 'regular, unshared file'):
+                toolkit.open_install_lock(prefix)
+            self.assertEqual(external.read_text(), 'preserved')
 
     def test_same_ampx_version_with_drifted_lock_does_not_pass_check(self):
         with tempfile.TemporaryDirectory() as tmp:

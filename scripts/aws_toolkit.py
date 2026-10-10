@@ -81,6 +81,20 @@ def managed_bin(prefix):
     return directory
 
 
+def open_install_lock(prefix):
+    # NOFOLLOW prevents redirect creation; NONBLOCK prevents FIFO/device hangs.
+    descriptor = os.open(prefix / ".install.lock",
+                         os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
+    try:
+        info = os.fstat(descriptor)
+        if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_nlink != 1:
+            raise ValueError("Install lock must be a regular, unshared file owned by this user")
+        return os.fdopen(descriptor, "r+")
+    except BaseException:
+        os.close(descriptor)
+        raise
+
+
 def tool_path(name, prefix, project):
     if name == "ampx":
         return project / ".aws-toolkit/app-dev/node_modules/.bin/ampx" if project else None
@@ -264,7 +278,7 @@ def main():
         actions = {}
         if args.install:
             prefix.mkdir(parents=True, exist_ok=True)
-            with (prefix / ".install.lock").open("a") as lock:
+            with open_install_lock(prefix) as lock:
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 managed_bin(prefix).mkdir(exist_ok=True)
                 for name in MANIFEST["profiles"][profile]:

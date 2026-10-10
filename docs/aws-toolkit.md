@@ -43,7 +43,8 @@ Each fixed HTTPS archive must match its committed SHA256 before extraction or
 execution. ZIP/TAR links and traversal are rejected. AWS uses its bundled CLI
 executable; SSM's deb is extracted without running package scripts and only its
 client binary is retained. No SSM service is installed or started. Per-prefix
-nonblocking locking prevents concurrent installations. Existing managed
+nonblocking locking prevents concurrent installations. Lock symlinks, FIFOs,
+hard links and files owned by another user are rejected. Existing managed
 collisions fail closed rather than overwrite files. Completed earlier tools may
 remain if a later tool fails; inspect the inventory before retrying.
 
