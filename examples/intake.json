@@ -1,0 +1,6 @@
+{
+  "application": "status-board",
+  "purpose_and_data": {"purpose": "Display public service announcements", "sensitivity": "public"},
+  "visibility_and_domain": {"repository_visibility": "public", "application_visibility": "public", "hostname": "status-board.amitk.life"},
+  "deployment_and_budget": {"pipeline": "github-actions", "monthly_budget_usd": "0", "paid_services": "forbidden", "previews": "disabled"}
+}

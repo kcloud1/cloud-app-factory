@@ -1,34 +1,22 @@
 # Context
 
-Status: NOT_INITIALIZED
+## Project identity
 
-> `CONTEXT.md` is current-only recovery state. Do not keep milestone history, old resource IDs, completed plans, or chat transcripts here. Use Git history, closed Issues/PRs, or `docs/history/` for history.
+- Primary repository: https://github.com/kcloud1/cloud-app-factory
+- Directory: `/home/user/git/cloud-app-factory`
+- Template/reference repositories are read-only.
 
-## Project Identity
+## Current truth/active work
 
-- Project: `<project name>`
-- Primary Repository: `<owner/repo>`
-- Primary Directory: `<optional local path>`
-- Authorized Related Repositories: `<optional list>`
+- Initialized for offline M0–M1; accepted intent and ACTIVE SPEC recorded.
+- Issue: https://github.com/kcloud1/cloud-app-factory/issues/1
+- PR: https://github.com/kcloud1/cloud-app-factory/pull/5 (M0–M1 delivery).
+- Queued follow-up: Issue #2 release gate; #3 needs exact pilot approval;
+  #4 depends on #3 live acceptance.
+- Amit authorizes Codex review/merge of M0–M1; M2 stays gated.
+- No provider resources, deployments or secret reads.
+- No M0–M1 runtime blocker; future credentials/domains/resources unverified.
 
-## Current Truth
+## Next action
 
-- Repository created from `repo-starter`.
-- Initialization interview not yet completed.
-
-## Active Work
-
-- Issue: `<none>`
-- PR: `<none>`
-- Current milestone: `<none>`
-- Blocker: `<none>`
-
-## Next Action
-
-- Run the short `INIT.md` interview, then update project identity, `SPEC.md`, `ENV.md`, README purpose, and the first useful milestone.
-
-## Restart
-
-A fresh ChatGPT/Codex session should begin with `AGENTS.md` and the active Issue/PR when one exists.
-
-Load `CONTEXT.md` only when current-state/recovery context is missing, stale, or needed to restore repository bindings. Then load any other conditional file required by the `AGENTS.md` read contract and continue.
+Merge validated PR #5, then implement Issue #2's no-write release gate.
