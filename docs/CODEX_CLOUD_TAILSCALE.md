@@ -86,8 +86,9 @@ public firewall ports or add an exit node merely to make this guide work.
 WireGuard encryption ends at the destination tailnet node. For a routed subnet
 service, the subnet router decrypts before forwarding onto that LAN; HTTPS still
 protects the application connection to the service. Plain HTTP has no independent
-TLS layer. A listener, TLS certificate, host firewall and application authorization
-remain necessary even inside the tailnet. A service bound only to `127.0.0.1`
+TLS layer. Keep the listener's host firewall and any required application
+authorization; HTTPS still needs a valid service certificate inside the tailnet.
+A service bound only to `127.0.0.1`
 on the personal machine is not automatically reachable from another node.
 Windows/WSL/container port forwarding is a separate host concern; installing
 Tailscale on Windows does not automatically publish a WSL localhost service.
