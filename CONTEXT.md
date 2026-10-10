@@ -1,25 +1,23 @@
-# Context
+# Current factory context
 
-## Project identity
+Primary repository: https://github.com/kcloud1/cloud-app-factory
+Primary directory: /home/user/git/cloud-app-factory
+Authorized related repository: kcloud1/factory-pilot (routine-update proof).
+Templates and unrelated repositories remain read-only.
 
-- Primary repository: https://github.com/kcloud1/cloud-app-factory
-- Directory: `/home/user/git/cloud-app-factory`
-- Template/reference repositories are read-only.
+M0–M2 complete; M2 stays disabled/no-write with empty deployment allowlist.
+M3 Issue #3 closed with factory PR #7 merge
+d60d213b3fa77510deb29b084b0efa802c7c16a4, pilot PR #1 merge
+f9834502860329026c5d321d9f73b5815302249d, Actions run 38067305167 PASS,
+provider version/readback, exact live SHA and two browser PASS. Evidence:
+https://github.com/kcloud1/cloud-app-factory/issues/3#issuecomment-6099659025
 
-## Current truth/active work
-
-- Initialized for offline M0–M1; accepted intent and ACTIVE SPEC recorded.
-- Next gated issue: https://github.com/kcloud1/cloud-app-factory/issues/3
-- No-write M2 delivery: https://github.com/kcloud1/cloud-app-factory/pull/6
-- Reviewed allowlist is empty; publish is disabled. Pilot packet:
-  `docs/M3_PILOT_PACKET.md`.
-- Issue #3 needs exact pilot approval and provider metadata;
-  Issue #4 cannot dispatch until #3 live acceptance.
-- Amit authorizes Codex review/merge of M0–M1; M2 stays gated.
-- No provider resources, deployments or secret reads.
-- Org-secret metadata listing denied (403); no authorized Cloudflare readback.
-  Future credentials/domains/resources remain unverified; offline gates complete.
-
-## Next action
-
-Resolve Issue #3's exact pilot authorization and credential/provider evidence.
+Active Issue #4 / existing PR #8: versioned four-answer request packet,
+collision/repeat reconciliation and honest states. Publisher stays pilot-only.
+Routine Codex Cloud dispatch receipt:
+https://github.com/kcloud1/factory-pilot/pull/1#issuecomment-6099677130
+GitHub Codex integration reports no available environment despite earlier managed
+cloud development proof; no routine Cloud update/redeployment is yet proven.
+Next: finish PR #8 review/validation; reconcile the existing published pilot
+environment binding, then review one Cloud update PR and verify redeployment to
+the SAME Worker. No additional live browser cases under M4.

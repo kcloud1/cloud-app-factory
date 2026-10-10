@@ -64,3 +64,19 @@ Start with [AGENTS.md](AGENTS.md), [accepted intent](intent/0001-project-bootstr
 Origin: `kcloud1/cloud-app-factory`, from `amitkarpe/repo-starter`.
 No app repository, Worker, DNS, token or deployment is created by this milestone.
 The template and `cloud-ops-demo` remain unchanged.
+
+## Mobile cloud-only intake (plan only)
+
+Open [Actions](https://github.com/kcloud1/cloud-app-factory/actions/workflows/new-app-plan.yml)
+→ **New cloud app - four answers (plan only)** → **Run workflow**.
+Enter app name, public fictional purpose, optional exact hostname, and $0 budget.
+The artifact contains a deterministic plan, a one-paste Codex Cloud task, and a
+read-only caller for the existing shared factory planner. No local CLI, cloud
+credentials or provider writes are needed **for planning**.
+
+Read [cloud-only onboarding and its limits](docs/CLOUD_ONLY_BOOTSTRAP.md) before
+publishing. [M3 pilot #3](https://github.com/kcloud1/cloud-app-factory/issues/3)
+is closed after live proof; [factory PR #7](https://github.com/kcloud1/cloud-app-factory/pull/7)
+is reviewed and merged. Its publisher authorizes only factory-pilot. Future apps
+still require exact owner approval and a reviewed release interface.
+Per-repository GitHub/App and Codex Cloud authorizations remain explicit gates.

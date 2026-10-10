@@ -99,3 +99,14 @@ Close Issue #3 only after exact merged SHA/run/deployment/version/custom HTTPS
 and exactly two live browser checks agree. After PASS, Issue #4 may implement
 four-answer onboarding and one actual Codex Cloud update to this same pilot;
 no second app or local-CLI substitute for Cloud development proof.
+# M4 continuation
+
+Owner's current GO authorizes completing existing Issue #4/PR #8 after M3 live
+proof. M3 is closed with deployment evidence in Issue #3. M4 onboarding is
+proposal-only: versioned request/handoff/evidence packet, exact names, stable
+repeat invocation and conflict reconciliation. New applications remain gated;
+the reviewed pilot publisher allowlist is not generalized by this milestone.
+One actual Codex Cloud routine update and Git-triggered redeployment to the
+SAME factory-pilot Worker is authorized. No second app/resource, token change,
+manual deploy or repeated live browser suite is included. A failed Cloud task
+dispatch/environment binding is a real blocker, not proof of Cloud development.
