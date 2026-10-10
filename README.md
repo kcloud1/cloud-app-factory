@@ -1,5 +1,10 @@
 # Cloud App Factory
 
+Optional AWS-enabled projects can opt into the [AWS Cloud toolkit](docs/aws-toolkit.md)
+and [aws-cloudops Skill](.agents/skills/aws-cloudops/SKILL.md): pinned `core`,
+`cloudops` and project-local `app-dev` profiles. Installation and version checks
+are credential-free; AWS operations require separate exact-task authorization.
+
 Amit supplies four answers; the factory prepares a repeatable plan for Codex Cloud
 to develop an application in its own repository and for an approved pipeline to
 release its isolated Cloudflare Worker. M0–M1 delivers **offline planning only**.

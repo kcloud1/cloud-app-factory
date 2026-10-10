@@ -12,12 +12,17 @@ f9834502860329026c5d321d9f73b5815302249d, Actions run 38067305167 PASS,
 provider version/readback, exact live SHA and two browser PASS. Evidence:
 https://github.com/kcloud1/cloud-app-factory/issues/3#issuecomment-6099659025
 
-Active Issue #4 / existing PR #8: versioned four-answer request packet,
-collision/repeat reconciliation and honest states. Publisher stays pilot-only.
-Routine Codex Cloud dispatch receipt:
-https://github.com/kcloud1/factory-pilot/pull/1#issuecomment-6099677130
-GitHub Codex integration reports no available environment despite earlier managed
-cloud development proof; no routine Cloud update/redeployment is yet proven.
-Next: finish PR #8 review/validation; reconcile the existing published pilot
-environment binding, then review one Cloud update PR and verify redeployment to
-the SAME Worker. No additional live browser cases under M4.
+M4 Issue #4 closed: factory PR #8 merged
+ae17563bbdc86903fb2bf65c2d6323c639226b76; the existing Codex Cloud environment
+produced pilot PR #2, merged fc83a8a815432e55941db8bba8ac5d795e40d68a.
+Automatic release run 38068905425 passed on the SAME Worker; live source SHA
+matched. Evidence:
+https://github.com/kcloud1/cloud-app-factory/issues/4#issuecomment-6099912560
+
+M6 Issue #11 owns the optional pinned AWS software toolkit, credential-free
+validation and aws-cloudops Skill. See docs/aws-toolkit.md for the contract and
+Issue #11 for the exact review/merge and software-only acceptance receipt.
+No AWS authentication, resources, IAM or spending authority is included.
+M5 PR #10 is separate and remains untouched. Cloudflare pipelines and pilot stay
+unchanged. Next application adoption must use the reviewed full factory SHA,
+exact repository/Issue and explicit profile; AWS access needs separate authority.
