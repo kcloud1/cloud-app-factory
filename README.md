@@ -80,3 +80,11 @@ is closed after live proof; [factory PR #7](https://github.com/kcloud1/cloud-app
 is reviewed and merged. Its publisher authorizes only factory-pilot. Future apps
 still require exact owner approval and a reviewed release interface.
 Per-repository GitHub/App and Codex Cloud authorizations remain explicit gates.
+
+## Optional private services and local CLI
+
+[Codex Cloud + Tailscale](docs/CODEX_CLOUD_TAILSCALE.md) explains private-service
+connections, proxy/VPN internals, opt-in setup and validation. The default
+web/mobile development and GitHub Actions → Cloudflare pipeline needs no VPN or
+laptop. [Native CLI cloud commands](docs/CODEX_CLI_CLOUD.md) explain how an
+authenticated local CLI can submit and inspect cloud tasks independently.
