@@ -29,6 +29,8 @@ class CloudBootstrapTests(unittest.TestCase):
         first = draft("hello-cloud", "Public demo", "status.amitk.life", "0", SHA,
                       {"repositories": ["kcloud1/hello-cloud"], "workers": ["hello-cloud"], "hostnames": ["status.amitk.life"]})
         packet = json.loads(first["request.json"])
+        unobserved = draft("hello-cloud", "Public demo", "status.amitk.life", "0", SHA)
+        self.assertEqual(packet["request_id"], json.loads(unobserved["request.json"])["request_id"])
         self.assertEqual(packet["state"], "PLAN_ONLY")
         self.assertEqual(len(packet["existing_matches"]), 3)
         self.assertIn("RESOURCE_CONFLICT", packet["stop_gates"])
