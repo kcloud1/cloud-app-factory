@@ -1,0 +1,123 @@
+name: M3 approved factory-pilot Git release
+
+on:
+  workflow_call:
+    inputs:
+      factory_revision:
+        required: true
+        type: string
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: true
+      CLOUDFLARE_ACCOUNT_ID:
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dev1-factory-pilot-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      github.repository == 'kcloud1/factory-pilot' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      github.ref_protected
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify immutable factory workflow identity
+        env:
+          FACTORY_REVISION: ${{ inputs.factory_revision }}
+          WORKFLOW_IDENTITY: ${{ toJSON(job) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          revision = os.environ["FACTORY_REVISION"]
+          job = json.loads(os.environ["WORKFLOW_IDENTITY"])
+          if not re.fullmatch(r"[0-9a-f]{40}", revision):
+              raise SystemExit("A pinned factory SHA is required")
+          if job.get("workflow_repository") != "kcloud1/cloud-app-factory" or job.get("workflow_sha") != revision:
+              raise SystemExit("Reusable workflow revision mismatch")
+          PY
+
+      - name: Checkout exact protected-main commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          path: caller
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: caller/package-lock.json
+
+      - name: Validate and build without provider secrets
+        working-directory: caller
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.sha }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          npm ci
+          npm run check
+          npm run build
+
+      - name: Fail closed on a changed Worker, domain, public endpoint, or SHA
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, subprocess
+          from pathlib import Path
+
+          root = Path("caller")
+          actual = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+          if actual != os.environ["EXPECTED_SHA"] or not re.fullmatch(r"[0-9a-f]{40}", actual):
+              raise SystemExit("Source SHA differs from protected-main push")
+          raw = (root / "wrangler.jsonc").read_text()
+          config = json.loads(re.sub(r",(\s*[}\]])", r"\1", raw))
+          allowed = {"$schema", "name", "compatibility_date", "workers_dev", "preview_urls", "assets", "routes"}
+          if set(config) - allowed:
+              raise SystemExit("Unapproved Cloudflare configuration key")
+          if config.get("name") != "factory-pilot" or config.get("workers_dev") is not False or config.get("preview_urls") is not False:
+              raise SystemExit("Unapproved Worker identity or public endpoint")
+          if config.get("routes") != [{"pattern": "factory-pilot.amitk.life", "custom_domain": True}]:
+              raise SystemExit("Unapproved hostname or routing")
+          if config.get("assets", {}).get("directory") != "./dist":
+              raise SystemExit("Unapproved public assets root")
+          release = json.loads((root / "dist" / "release.json").read_text())
+          if release != {"marker": "factory-pilot-v1", "source_sha": actual, "data": "fictional", "pipeline": "github-actions"}:
+              raise SystemExit("Build release receipt mismatch")
+          print("Approved pilot target and exact source SHA verified")
+          PY
+
+      - name: Publish one approved Worker and Custom Domain
+        working-directory: caller
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ "$CLOUDFLARE_ACCOUNT_ID" != "7b5b3463a1c5453f4805289b5f42c110" ]; then
+            echo "Approved Cloudflare credential/account unavailable"
+            exit 1
+          fi
+          npx --no-install wrangler deploy
+
+      - name: Record Git release identity
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          FACTORY_REVISION: ${{ inputs.factory_revision }}
+        run: |
+          {
+            echo "Git-triggered Worker deployment: factory-pilot"
+            echo "Source SHA: $SOURCE_SHA"
+            echo "Factory workflow SHA: $FACTORY_REVISION"
+            echo "Approved hostname: factory-pilot.amitk.life"
+            echo "Verify Cloudflare deployment/version and HTTPS independently before closing Issue #3."
+          } >> "$GITHUB_STEP_SUMMARY"
