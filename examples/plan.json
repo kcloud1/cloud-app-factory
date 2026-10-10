@@ -1,0 +1,67 @@
+{
+  "acceptance": [
+    "approved exact repository/account/Worker/hostname and budget",
+    "fresh resource and pipeline readback before execution",
+    "merged SHA equals pipeline source SHA",
+    "active deployment/version targets isolated Worker",
+    "custom-domain HTTPS and two app interactions",
+    "unapproved workers.dev and preview endpoints disabled",
+    "retained resources, cost and rollback receipt"
+  ],
+  "architecture": {
+    "dns_owner": "owner-approved exact custom domain",
+    "isolated_worker_per_application": true,
+    "other_pipeline_must_be_disabled": true,
+    "pipeline": "github-actions",
+    "preview_urls": false,
+    "workers_dev": false
+  },
+  "blockers": [
+    "BUDGET_ENFORCEMENT_UNVERIFIED",
+    "CODEX_CLOUD_ENVIRONMENT_USER_SELECTED",
+    "CREDENTIAL_AVAILABILITY_AND_SCOPE_UNVERIFIED",
+    "DOMAIN_OWNERSHIP_UNVERIFIED",
+    "EXACT_TARGET_OWNER_APPROVAL_REQUIRED",
+    "M0_M1_NO_EXECUTION_AUTHORITY",
+    "PIPELINE_EXCLUSIVITY_UNVERIFIED",
+    "RESOURCE_INVENTORY_UNVERIFIED"
+  ],
+  "conflicts": [],
+  "credential_contract": {
+    "account_id_existing_secret": "CLOUDFLARE_ACCOUNT_ID",
+    "account_id_future_variable": "CLOUDFLARE_ACCOUNT_ID",
+    "inherit_secrets": false,
+    "token_secret": "CLOUDFLARE_API_TOKEN"
+  },
+  "execution_allowed": false,
+  "intake": {
+    "application": "status-board",
+    "deployment_and_budget": {
+      "monthly_budget_usd": "0.00",
+      "paid_services": "forbidden",
+      "pipeline": "github-actions",
+      "previews": "disabled"
+    },
+    "purpose_and_data": {
+      "purpose": "Display public service announcements",
+      "sensitivity": "public"
+    },
+    "visibility_and_domain": {
+      "application_visibility": "public",
+      "hostname": "status-board.amitk.life",
+      "repository_visibility": "public"
+    }
+  },
+  "mode": "dry-run",
+  "plan_id": "7fc7917cc12b38d60addfd2a4fcb267723a0a10b7f4e8fe0190efdbc873276e6",
+  "schema_version": 1,
+  "target": {
+    "account_alias": "dev1",
+    "application_visibility": "public",
+    "hostname": "status-board.amitk.life",
+    "production_branch": "main",
+    "repository": "kcloud1/status-board",
+    "repository_visibility": "public",
+    "worker": "status-board"
+  }
+}

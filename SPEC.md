@@ -1,61 +1,63 @@
 # Specification
 
-Status: DRAFT
-Context: `<PERSONAL | WORK>`
-Environment: `<LOCAL | LAB | DEV | NONPROD | PROD>`
+Status: ACTIVE
+Context: PERSONAL
+Environment: LAB (repository/offline planning only)
+Owning issue: https://github.com/kcloud1/cloud-app-factory/issues/1
+Accepted intent: [bootstrap](intent/0001-project-bootstrap/intent.md)
 
-## Objective
+## Objective and authority
 
-Describe the problem and intended result.
+Build a reusable four-answer factory for independently developed/deployed apps.
+M0 initializes contracts. M1 delivers deterministic offline intake, inspectable
+plans, conflict/authorization gates, an example, focused validation and a reusable
+Actions dry-run workflow with future deployment design.
 
-## Outcome
-
-Describe the usable milestone/release package to deliver.
-
-## Authorized
-
-List the actions that may proceed without repeated approval while this SPEC is ACTIVE and the owning Issue/instruction remains in scope.
-
-For `PERSONAL` + `LAB`/`DEV`, explicitly authorized deterministic work may include repo-owned implementation, deployment, cloud resource creation/mutation, validation, reset, and cleanup without asking resource-by-resource.
-
-For `WORK` and especially `PROD`, grant only the bounded authority actually intended. Read-only investigation may be standing authority when explicitly stated; mutation requires proportionate approval in this SPEC or the current user instruction.
-
-Repository visibility is not an authority signal. Private does not mean personal; public does not mean unrestricted.
+Amit's 2026-10-10 GO authorizes implementation, local checks, branch/commit,
+one cohesive PR and Issue evidence. His later explicit instruction authorizes
+Codex to review and merge M0–M1 without waiting for G. M2 remains gated.
+Follow-up Issues/PRs require their own approved scope; do not invent work to meet a count.
 
 ## MUST
 
-- List required behavior and acceptance-critical invariants.
+- Four top-level answers, strict schema, sanitized invalid-input errors.
+- Stable JSON/digest, conservative repository/Worker names, exact DNS hostname.
+- Validate privacy choices and finite nonnegative USD budget.
+- Flag absent/stale inventory and collisions; never infer ownership from names.
+- Always dry-run with execution disabled; missing authority blocks.
+- One isolated Worker per app; exactly one deployment pipeline per Worker.
+- Workers.dev and previews disabled unless separately approved.
+- Explicit credential mapping, no values read/printed, no broad inheritance.
+- One cohesive implementation PR, preserving existing governance.
 
 ## MUST NOT
 
-- List hard scope, security, data, publication, production, destructive, or cost boundaries.
+Create app repositories, Workers, DNS, tokens, installations, AWS resources,
+spending or public apps; execute deploy workflows; widen credentials; modify
+`repo-starter` or `cloud-ops-demo`; add unnecessary dependencies/test frameworks.
+No live credential test.
 
-## Phases / Milestones
+## Interface and implementation plan
 
-Group related work into a cohesive useful package, normally several tightly coupled tasks or 2-3 phases sharing one outcome and trust boundary.
+`factory.py --intake FILE [--inventory FILE] [--mode dry-run]` uses
+`examples/intake.json`'s schema. Without a file it asks four questions.
+Exit 0: plan produced, not permission. Exit 2: invalid input.
+Plans contain target, architecture, normalized intake, conflicts, blockers,
+credential contract and future acceptance criteria. Inventory cannot unlock execution.
 
-- Phase 1: `<outcome>`
-- Phase 2: `<outcome>`
-- Phase 3: `<outcome>`
+1. Verify origin/Issue/acceptance and initialize contracts.
+2. Implement standard-library planner and reusable dry-run/design.
+3. Validate determinism, malformed input, conflicts, privacy and authorization;
+   review the actual diff.
+4. Publish evidence, review and merge the single PR under updated owner authority.
 
-Do not stop between routine approved phases merely to request permission again.
+Local checks do not prove Codex Cloud, secret access, provider permissions,
+domains, builds or live apps. Failed validation keeps the same PR for correction.
+Rollback is a reviewed source revert; no runtime resources need cleanup.
 
-## Verification
+## Stop gates and acceptance
 
-State the smallest meaningful proof: focused tests/checks, runtime/provider readback, user-path validation, and cleanup/retention state when applicable.
-
-## Stop Gates
-
-Stop and ask only when required by a real boundary, for example:
-
-- target repository/account/environment does not match the approved scope;
-- work would enter PROD or another higher-risk environment without authority;
-- destructive/non-recoverable data loss, credential/secret mutation, public exposure, or material cost is not explicitly approved;
-- implementation would materially widen architecture, security/trust boundary, or external integration beyond the milestone;
-- required validation fails or current state is ambiguous/unsafe.
-
-Technical failure remains a blocker even when mutation is otherwise authorized.
-
-## Acceptance
-
-List concise conditions that make the whole milestone reviewable and complete.
+Stop on identity mismatch, unresolved validation failure or work outside limits.
+Pass: complete contracts, working deterministic valid/invalid intake, explicit
+unresolved gates, reviewed workflow/design and one evidence-backed PR.
+M2 requires the separate [exact authorization packet](docs/FACTORY_PIPELINE.md).

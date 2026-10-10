@@ -1,6 +1,10 @@
 # Initialization
 
-Status: NOT_INITIALIZED
+Status: INITIALIZED
+
+Completed for offline M0–M1 on 2026-10-10: accepted bootstrap intent, README,
+ACTIVE SPEC, offline READY ENV and current CONTEXT. Authority: Issue #1 and
+Amit's explicit GO. Initialization does not authorize M2 provisioning.
 
 Use this file only for first-time repository setup or when Amit explicitly asks to reinitialize the project.
 
