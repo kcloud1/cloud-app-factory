@@ -48,8 +48,14 @@ Use `--inventory snapshot.json` to flag repository/Worker/hostname matches for
 ownership reconciliation; user-entered/offline inventory never establishes READY.
 Repeat identical inputs into the same output directory to preserve the packet.
 Changed output requires a new revision directory. No provider operations exist.
-Packets created before the budget wording correction keep their original files;
-regenerate into a new revision directory rather than silently replacing them.
+`request.json` v2 replaces v1's `monthly_cost_cap_usd` with
+`monthly_budget_target_usd` and explicit `budget_enforcement: UNVERIFIED`.
+Readers must select the request format by `schema_version` and reject unsupported
+versions; a historical v1 budget field does not prove provider spend enforcement.
+Keep all historical packets unchanged, including any pre-review v1 packet with
+the renamed fields; regenerate into a new revision directory, never overwrite or
+relabel them. The canonical `plan.json` remains v1 and the normalized-intent
+request ID stays unchanged.
 
 Track the same request ID in EVIDENCE.json. PLAN_ONLY is a proposal;
 OWNER_APPROVAL_REQUIRED records absent exact authority; READY requires verified

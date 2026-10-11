@@ -42,7 +42,7 @@ def draft(app, purpose, hostname, budget, factory_revision, inventory=None):
     if proposed["execution_allowed"]:
         raise InvalidIntake("Planning must never authorize execution")
     packet = {
-        "schema_version": 1, "request_id": request_id,
+        "schema_version": 2, "request_id": request_id,
         "state": "PLAN_ONLY", "execution_allowed": False,
         "source_template": {"repository": "amitkarpe/repo-starter", "sha": TEMPLATE_REVISION},
         "factory_revision": factory_revision, "target": proposed["target"],

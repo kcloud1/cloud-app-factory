@@ -25,6 +25,8 @@ class CloudBootstrapTests(unittest.TestCase):
         self.assertIn("factory-plan.yml@" + SHA, first[".github/workflows/factory-plan.yml"])
         self.assertNotIn("CLOUDFLARE_API_TOKEN", first[".github/workflows/factory-plan.yml"])
         packet = json.loads(first["request.json"])
+        self.assertEqual(packet["schema_version"], 2)
+        self.assertEqual(json.loads(first["plan.json"])["schema_version"], 1)
         self.assertEqual(packet["monthly_budget_target_usd"], "0.00")
         self.assertEqual(packet["budget_enforcement"], "UNVERIFIED")
         self.assertNotIn("monthly_cost_cap_usd", packet)
