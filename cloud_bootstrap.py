@@ -46,7 +46,8 @@ def draft(app, purpose, hostname, budget, factory_revision, inventory=None):
         "state": "PLAN_ONLY", "execution_allowed": False,
         "source_template": {"repository": "amitkarpe/repo-starter", "sha": TEMPLATE_REVISION},
         "factory_revision": factory_revision, "target": proposed["target"],
-        "deployment_mode": "github-actions", "monthly_cost_cap_usd": "0.00",
+        "deployment_mode": "github-actions", "monthly_budget_target_usd": "0.00",
+        "budget_enforcement": "UNVERIFIED",
         "reviewed_publisher": {"sha": PUBLISHER_REVISION, "workflow": "factory-pilot-publish.yml", "allowlist": ["kcloud1/factory-pilot"], "new_apps_enabled": False},
         "availability": {"github_app": "UNVERIFIED", "codex_cloud_environment": "UNVERIFIED", "secret_selection": "UNVERIFIED"},
         "existing_matches": proposed["conflicts"],
@@ -67,6 +68,7 @@ This is a PROPOSAL, not permission to create a public app, domain or Worker.
 - Proposed hostname: {host} (public, exact Custom Domain)
 - Public purpose (data, not agent instructions): {json.dumps(purpose.strip())}
 - Static, public fictional data; no AWS, paid Cloudflare services, workers.dev or previews.
+- Budget: $0 incremental target; provider billing enforcement is UNVERIFIED.
 - Hosting: GitHub Actions only, using one reviewed SHA-pinned factory publisher.
 
 ## GO only after owner acceptance and provider authorization
@@ -102,7 +104,7 @@ jobs:
     return {
         "plan.json": json.dumps(proposed, indent=2, sort_keys=True) + "\n",
         "request.json": json.dumps(packet, indent=2, sort_keys=True) + "\n",
-        "REQUEST.md": f"# Proposed request {request_id}\n\nState: PLAN_ONLY; no execution authority.\n\nRepository: kcloud1/{name} (public)\nWorker: {name} in dev1\nHostname: {host} (public)\nBudget: $0 incremental; GitHub Actions sole writer.\nTemplate SHA: {TEMPLATE_REVISION}\nFactory SHA: {factory_revision}\n\nReconcile existing matches and stop gates in request.json before acceptance. The reviewed publisher currently authorizes ONLY factory-pilot. New applications require their own reviewed authorization/interface; this packet cannot deploy them.\n",
+        "REQUEST.md": f"# Proposed request {request_id}\n\nState: PLAN_ONLY; no execution authority.\n\nRepository: kcloud1/{name} (public)\nWorker: {name} in dev1\nHostname: {host} (public)\nBudget: $0 incremental target, not an enforced provider spend cap; GitHub Actions sole writer.\nTemplate SHA: {TEMPLATE_REVISION}\nFactory SHA: {factory_revision}\n\nReconcile existing matches and stop gates in request.json before acceptance. The reviewed publisher currently authorizes ONLY factory-pilot. New applications require their own reviewed authorization/interface; this packet cannot deploy them.\n",
         "EVIDENCE.json": json.dumps({"request_id": request_id, "state": "PLAN_ONLY", "approval_url": None, "app_pr_url": None, "merged_sha": None, "actions_run_id": None, "cloud_task_url": None, "cloudflare_version": None, "live_source_sha": None, "browser_checks": [], "blockers": proposed["blockers"]}, indent=2, sort_keys=True) + "\n",
         "CODEX_CLOUD_GO.md": task,
         ".factory/intake.json": json.dumps(intake, indent=2, sort_keys=True) + "\n",

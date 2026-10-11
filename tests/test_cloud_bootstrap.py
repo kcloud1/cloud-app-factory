@@ -24,6 +24,11 @@ class CloudBootstrapTests(unittest.TestCase):
         self.assertIn("PLAN_ONLY", first["CODEX_CLOUD_GO.md"])
         self.assertIn("factory-plan.yml@" + SHA, first[".github/workflows/factory-plan.yml"])
         self.assertNotIn("CLOUDFLARE_API_TOKEN", first[".github/workflows/factory-plan.yml"])
+        packet = json.loads(first["request.json"])
+        self.assertEqual(packet["monthly_budget_target_usd"], "0.00")
+        self.assertEqual(packet["budget_enforcement"], "UNVERIFIED")
+        self.assertNotIn("monthly_cost_cap_usd", packet)
+        self.assertIn("BUDGET_ENFORCEMENT_UNVERIFIED", packet["stop_gates"])
 
     def test_exact_host_collision_and_repeat_reconciliation(self):
         first = draft("hello-cloud", "Public demo", "status.amitk.life", "0", SHA,
